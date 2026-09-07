@@ -31,4 +31,5 @@ def tokens_to_text(tokens: list[int]) -> str:
 
 	return text
 
-print(f"Vocabulary Size: {len(vocabulary)}")
+if __name__ == "__main__":
+	print(f"Vocabulary Size: {len(vocabulary)}")
