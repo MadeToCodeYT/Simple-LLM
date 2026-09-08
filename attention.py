@@ -1,4 +1,5 @@
 from random import uniform
+import math
 
 def generate_random_vector(length: int) -> list[float]:
     vector = []
@@ -26,9 +27,9 @@ EMBEDDING_SIZE = 32
 ATTENTION_SIZE = 32
 ATTENTION_SQRT = ATTENTION_SIZE**0.5
 
-W_Q = [generate_random_vector(EMBEDDING_SIZE) for _ in range(EMBEDDING_SIZE)]
-W_K = [generate_random_vector(EMBEDDING_SIZE) for _ in range(EMBEDDING_SIZE)]
-W_V = [generate_random_vector(EMBEDDING_SIZE) for _ in range(EMBEDDING_SIZE)]
+w_Q = [generate_random_vector(EMBEDDING_SIZE) for _ in range(EMBEDDING_SIZE)]
+w_K = [generate_random_vector(EMBEDDING_SIZE) for _ in range(EMBEDDING_SIZE)]
+w_V = [generate_random_vector(EMBEDDING_SIZE) for _ in range(EMBEDDING_SIZE)]
 
 def get_qkv(embeddings: list[list[float]]) -> dict[str, list[list[float]]]:
     queries = []
@@ -36,9 +37,9 @@ def get_qkv(embeddings: list[list[float]]) -> dict[str, list[list[float]]]:
     values = []
 
     for embedding in embeddings:
-        queries.append(calc_prod(embedding, W_Q))
-        keys.append(calc_prod(embedding, W_K))
-        values.append(calc_prod(embedding, W_V))
+        queries.append(calc_prod(embedding, w_Q))
+        keys.append(calc_prod(embedding, w_K))
+        values.append(calc_prod(embedding, w_V))
 
     return {
         "queries": queries,
@@ -54,7 +55,7 @@ def attention_score(query: list[float], key: list[float]) -> float:
 
     return score
 
-def calculate_scores(queries: list[list[float]], keys: list[list[float]]):
+def calculate_scores(queries: list[list[float]], keys: list[list[float]]) -> list[list[float]]:
     score_table = []
 
     for query in queries:
@@ -67,3 +68,41 @@ def calculate_scores(queries: list[list[float]], keys: list[list[float]]):
         score_table.append(row)
 
     return score_table
+
+def apply_casual_mask(score_table: list[list[float]]):
+    """
+    Make each token only be able to see itself and the tokens before it
+    """
+    
+    masked_table = [[float("-inf") for _ in range(len(score_table[0]))] for _ in range(len(score_table))]
+    
+    for i in range(len(score_table)):
+        for j in range(len(score_table[0])):
+            if j > i:
+                break
+            masked_table[i][j] = score_table[i][j]
+
+    return masked_table
+
+def apply_softmax(row: list[float]) -> list[float]:
+    """
+    Modifies each value so that:
+        - Every value between `0` and `1`
+        - The values add up to **1**
+        - `-inf` becomes **0**
+        - Larger scores get larger probabilities
+    """
+
+    exponentials = [math.exp(val) for val in row]
+    total = sum(exponentials)
+    probabilities = [exp/total for exp in exponentials]
+
+    return probabilities
+
+def apply_softmax_to_masked(masked_score_table: list[list[float]]) -> list[list[float]]:
+    result = []
+
+    for row in masked_score_table:
+        result.append(apply_softmax(row))
+
+    return result
