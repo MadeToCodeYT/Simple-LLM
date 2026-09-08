@@ -31,7 +31,7 @@ w_Q = [generate_random_vector(EMBEDDING_SIZE) for _ in range(EMBEDDING_SIZE)]
 w_K = [generate_random_vector(EMBEDDING_SIZE) for _ in range(EMBEDDING_SIZE)]
 w_V = [generate_random_vector(EMBEDDING_SIZE) for _ in range(EMBEDDING_SIZE)]
 
-def get_qkv(embeddings: list[list[float]]) -> dict[str, list[list[float]]]:
+def get_qkv(embeddings: list[list[float]]) -> tuple[list[list[float]], list[list[float]], list[list[float]]]:
     queries = []
     keys = []
     values = []
@@ -41,11 +41,13 @@ def get_qkv(embeddings: list[list[float]]) -> dict[str, list[list[float]]]:
         keys.append(calc_prod(embedding, w_K))
         values.append(calc_prod(embedding, w_V))
 
-    return {
-        "queries": queries,
-        "keys": keys,
-        "values": values,
-    }
+    return queries, keys, values
+
+    # return {
+    #     "queries": queries,
+    #     "keys": keys,
+    #     "values": values,
+    # }
 
 def attention_score(query: list[float], key: list[float]) -> float:
     score = 0

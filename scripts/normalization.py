@@ -58,22 +58,27 @@ def relu(input: list[float]) -> list[float]:
 
     return output
 
-input_vector = generate_random_vector(32)
+def apply_feed_forward_to_vectors(tokens: list[list[float]], weights_1: list[list[float]], bias_1: list[float], weights_2: list[list[float]], bias_2: list[float]) -> list[list[float]]:
+    applied = []
 
-# First linear layer: 32 → 128
-weights_1 = [generate_random_vector(32) for _ in range(128)]
-biases_1 = generate_random_vector(128)
+    for token in tokens:
+        hidden = linear_layer(token, weights_1, bias_1)
 
-hidden = linear_layer(input_vector, weights_1, biases_1)
-print("After first linear:", len(hidden))
+        activated = relu(hidden)
 
-# ReLU: 128 → 128
-activated = relu(hidden)
-print("After ReLU:", len(activated))
+        output = linear_layer(activated, weights_2, bias_2)
 
-# Second linear layer: 128 → 32
-weights_2 = [generate_random_vector(128) for _ in range(32)]
-biases_2 = generate_random_vector(32)
+        applied.append(output)
 
-output = linear_layer(activated, weights_2, biases_2)
-print("Final output:", len(output))
+    return applied
+
+def add_feed_forward_residual(vectors: list[list[float]], feed_forward_outputs: list[list[float]]) -> list[list[float]]:
+    residual = []
+    for i in range(len(vectors)):
+        row = []
+        for j in range(len(vectors[i])):
+            row.append(vectors[i][j] + feed_forward_outputs[i][j])
+
+        residual.append(row)
+
+    return residual
