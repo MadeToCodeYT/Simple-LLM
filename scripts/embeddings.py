@@ -1,4 +1,4 @@
-import tokenizer
+import scripts.tokenizer as tokenizer
 from random import uniform
 
 EMBEDDING_SIZE = 32

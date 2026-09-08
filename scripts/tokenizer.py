@@ -2,7 +2,7 @@
 # Needs to work in reverse too
 # Needs to create a vocabulary by looping through dataset.txt
 
-with open("dataset.txt", "r") as file:
+with open("data/dataset.txt", "r") as file:
     data = file.readlines()
 
 vocabulary = {}

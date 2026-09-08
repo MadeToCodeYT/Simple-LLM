@@ -1,4 +1,4 @@
-import tokenizer, embeddings, positional, attention
+import scripts.tokenizer as tokenizer, scripts.embeddings as embeddings, scripts.positional as positional, scripts.attention as attention
 
 text = "Hello World!"
 
