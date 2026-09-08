@@ -106,3 +106,17 @@ def apply_softmax_to_masked(masked_score_table: list[list[float]]) -> list[list[
         result.append(apply_softmax(row))
 
     return result
+
+def apply_weighted_value_sums(attention_weights: list[list[float]], values: list[list[float]]) -> list[list[float]]:
+    result = []
+
+    for row in attention_weights:
+        vector = [0.0] * len(values[0])
+
+        for i, weight in enumerate(row):
+            for j, value in enumerate(values[i]):
+                vector[j] += weight * value
+
+        result.append(vector)
+
+    return result
