@@ -1,3 +1,12 @@
+from random import uniform
+
+def generate_random_vector(length: int) -> list[float]:
+    vector = []
+    for _ in range(length):
+        vector.append(uniform(-1, 1))
+
+    return vector
+
 def layerNorm(layer: list[float]) -> list[float]:
     mean = sum(layer) / len(layer)
 
@@ -29,3 +38,42 @@ def add_residual_connection(position_aware_embeddings: list[list[float]], attent
         residual.append(row)
 
     return residual
+
+# Weights -> 128 vectors containing 32 weights
+def linear_layer(input: list[float], weights: list[list[float]], biases: list[float]) -> list[float]:
+    result = []
+
+    for i, weight in enumerate(weights):
+        total = 0
+        for j in range(len(weight)):
+            total += input[j] * weight[j]
+        result.append(total + biases[i])
+
+    return result
+
+def relu(input: list[float]) -> list[float]:
+    output = []
+    for val in input:
+        output.append(max(0, val))
+
+    return output
+
+input_vector = generate_random_vector(32)
+
+# First linear layer: 32 → 128
+weights_1 = [generate_random_vector(32) for _ in range(128)]
+biases_1 = generate_random_vector(128)
+
+hidden = linear_layer(input_vector, weights_1, biases_1)
+print("After first linear:", len(hidden))
+
+# ReLU: 128 → 128
+activated = relu(hidden)
+print("After ReLU:", len(activated))
+
+# Second linear layer: 128 → 32
+weights_2 = [generate_random_vector(128) for _ in range(32)]
+biases_2 = generate_random_vector(32)
+
+output = linear_layer(activated, weights_2, biases_2)
+print("Final output:", len(output))
