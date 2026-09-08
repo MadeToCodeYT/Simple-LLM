@@ -1,11 +1,6 @@
-import tokenizer, embeddings, positional, attention, normalization, transformer
+import transformer
 
-text = "Hi"
+prompt = "The "
+result = transformer.generate(prompt, 20)
 
-tokens = tokenizer.text_to_tokens(text)
-
-embeds = embeddings.tokens_to_embeddings(tokens)
-
-positional_info = positional.get_position_aware_embeddings(embeds)
-
-print(len(embeds[0]))
+print(result)
