@@ -3,13 +3,7 @@ import embeddings
 import positional
 import normalization
 import attention
-
-weights_1 = [attention.generate_random_vector(32) for _ in range(128)]
-biases_1 = attention.generate_random_vector(128)
-weights_2 = [attention.generate_random_vector(128) for _ in range(32)]
-biases_2 = attention.generate_random_vector(32)
-output_weights = [attention.generate_random_vector(32) for _ in range(59)]
-output_biases = attention.generate_random_vector(59)
+from parameters import *
 
 def transformer_block(position_aware_embeddings: list[list[float]]) -> list[list[float]]:
     queries, keys, values = attention.get_qkv(position_aware_embeddings)

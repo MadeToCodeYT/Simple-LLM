@@ -1,12 +1,5 @@
-from random import uniform
 import math
-
-def generate_random_vector(length: int) -> list[float]:
-    vector = []
-    for _ in range(length):
-        vector.append(uniform(-1, 1))
-
-    return vector
+from parameters import *
 
 def calc_prod(vector: list[float], matrix: list[list[float]]) -> list[float]:
     if len(matrix[0]) != len(vector):
@@ -22,14 +15,6 @@ def calc_prod(vector: list[float], matrix: list[list[float]]) -> list[float]:
         product.append(row_total)
         
     return product
-
-EMBEDDING_SIZE = 32
-ATTENTION_SIZE = 32
-ATTENTION_SQRT = ATTENTION_SIZE**0.5
-
-w_Q = [generate_random_vector(EMBEDDING_SIZE) for _ in range(EMBEDDING_SIZE)]
-w_K = [generate_random_vector(EMBEDDING_SIZE) for _ in range(EMBEDDING_SIZE)]
-w_V = [generate_random_vector(EMBEDDING_SIZE) for _ in range(EMBEDDING_SIZE)]
 
 def get_qkv(embeddings: list[list[float]]) -> tuple[list[list[float]], list[list[float]], list[list[float]]]:
     queries = []

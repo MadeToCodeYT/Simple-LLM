@@ -1,12 +1,3 @@
-from random import uniform
-
-def generate_random_vector(length: int) -> list[float]:
-    vector = []
-    for _ in range(length):
-        vector.append(uniform(-1, 1))
-
-    return vector
-
 def layerNorm(layer: list[float]) -> list[float]:
     mean = sum(layer) / len(layer)
 

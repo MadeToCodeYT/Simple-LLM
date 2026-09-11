@@ -1,7 +1,5 @@
 from random import uniform
-
-MAX_CONTEXT_LENGTH = 128
-EMBEDDING_SIZE = 32
+from parameters import EMBEDDING_SIZE, MAX_CONTEXT_LENGTH
 
 positional_table = []
 for position in range(MAX_CONTEXT_LENGTH):

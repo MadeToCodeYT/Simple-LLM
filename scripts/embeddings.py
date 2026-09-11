@@ -1,7 +1,6 @@
 import tokenizer
 from random import uniform
-
-EMBEDDING_SIZE = 32
+from parameters import EMBEDDING_SIZE
 
 embedding_table = []
 for token in tokenizer.vocabulary.values():
