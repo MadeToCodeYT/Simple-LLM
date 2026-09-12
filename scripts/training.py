@@ -227,6 +227,76 @@ def calculate_scores_gradient(
 
     return queries_gradients, keys_gradients
 
+def calculate_qkv_gradient(
+    queries_gradient: list[list[float]],
+    keys_gradient: list[list[float]],
+    values_gradient: list[list[float]],
+    position_aware_embeddings: list[list[float]]
+) -> list[list[float]]:
+
+    result = []
+
+    for i in range(len(position_aware_embeddings)):
+        _, _, query_input_gradient = calculate_linear_layer_gradients(
+            queries_gradient[i],
+            position_aware_embeddings[i],
+            w_Q
+        )
+
+        _, _, key_input_gradient = calculate_linear_layer_gradients(
+            keys_gradient[i],
+            position_aware_embeddings[i],
+            w_K
+        )
+
+        _, _, value_input_gradient = calculate_linear_layer_gradients(
+            values_gradient[i],
+            position_aware_embeddings[i],
+            w_V
+        )
+
+        embedding_gradient = []
+
+        for k in range(len(position_aware_embeddings[i])):
+            embedding_gradient.append(
+                query_input_gradient[k]
+                + key_input_gradient[k]
+                + value_input_gradient[k]
+            )
+
+        result.append(embedding_gradient)
+
+    return result
+
+def calculate_qkv_parameter_gradients(
+    queries_gradient: list[list[float]],
+    keys_gradient: list[list[float]],
+    values_gradient: list[list[float]],
+    position_aware_embeddings: list[list[float]]
+) -> tuple[
+    list[list[float]],
+    list[list[float]],
+    list[list[float]]
+]:
+    W_Q_gradient = [[0.0 for _ in range(len(queries_gradient))] for _ in range(len(queries_gradient))]
+    W_K_gradient = [[0.0 for _ in range(len(keys_gradient))] for _ in range(len(keys_gradient))]
+    W_V_gradient = [[0.0 for _ in range(len(values_gradient))] for _ in range(len(values_gradient))]
+
+    for i in range(len(position_aware_embeddings)):
+        for r in range(len(queries_gradient[i])):
+            for c in range(len(position_aware_embeddings[i])):
+                W_Q_gradient[r][c] += queries_gradient[i][r] * position_aware_embeddings[i][c]
+        
+        for r in range(len(keys_gradient[i])):
+            for c in range(len(position_aware_embeddings[i])):
+                W_K_gradient[r][c] += keys_gradient[i][r] * position_aware_embeddings[i][c]
+        
+        for r in range(len(values_gradient[i])):
+            for c in range(len(position_aware_embeddings[i])):
+                W_V_gradient[r][c] += values_gradient[i][r] * position_aware_embeddings[i][c]
+
+    return W_Q_gradient, W_K_gradient, W_V_gradient
+
 
 def backpropagate(
     predictions: list[float], 
@@ -236,7 +306,12 @@ def backpropagate(
     final_layernorm_input: list[float], 
     relu_output: list[float],
     linear_1_output: list[float],
-    normalized_attention: list[float]
+    normalized_attention: list[float],
+    position_aware_embeddings: list[list[float]],
+    attention_weights: list[list[float]],
+    queries: list[list[float]],
+    keys: list[list[float]],
+    values: list[list[float]]
 ):
     logits_gradient = calculate_logits_gradient(predictions, target)
 
@@ -248,7 +323,7 @@ def backpropagate(
 
     final_layernorm_gradient = calculate_layernorm_gradient(output_vector_gradient, final_layernorm_input)
 
-    normalized_attention_vector, feed_forward_output_gradient = calculate_residual_gradient(final_layernorm_gradient)
+    normalized_attention_gradient_from_residual, feed_forward_output_gradient = calculate_residual_gradient(final_layernorm_gradient)
 
     weights_2_gradients, biases_2_gradients, relu_gradient = calculate_linear_layer_gradients(feed_forward_output_gradient, relu_output, weights_2)
 
@@ -258,8 +333,34 @@ def backpropagate(
         linear_1_gradient, normalized_attention, weights_1
     )
 
-    normalized_attention_gradient = [a + b for a, b in zip(normalized_attention_vector, normalized_attention_gradient_from_ffn)]
+    normalized_attention_gradient = [
+        a + b for a, b in zip(normalized_attention_gradient_from_residual, normalized_attention_gradient_from_ffn)
+    ]
 
     residual_attention_gradient = calculate_layernorm_gradient(normalized_attention_gradient, first_layernorm_input)
 
     position_embeddings_gradient, attention_output_gradient = calculate_residual_gradient(residual_attention_gradient)
+
+    attention_weights_gradient, values_gradient = calculate_weighted_value_sums_gradient(attention_output_gradient, attention_weights, values)
+
+    scores_after_softmax_gradient = calculate_softmax_gradients(attention_weights_gradient, attention_weights)
+
+    scores_gradient = calculate_causal_mask_gradient(scores_after_softmax_gradient)
+
+    queries_gradient, keys_gradient = calculate_scores_gradient(scores_gradient, queries, keys)
+
+    position_aware_embeddings_gradient = calculate_qkv_gradient(
+        queries_gradient,
+        keys_gradient,
+        values_gradient,
+        position_aware_embeddings
+    )
+
+    W_Q_gradient, W_K_gradient, W_V_gradient = calculate_qkv_parameter_gradients(
+        queries_gradient,
+        keys_gradient,
+        values_gradient,
+        position_aware_embeddings
+    )
+
+    return output_weight_gradients, output_bias_gradients, weights_1_gradients, biases_1_gradients, weights_2_gradients, biases_2_gradients, W_Q_gradient, W_K_gradient, W_V_gradient
