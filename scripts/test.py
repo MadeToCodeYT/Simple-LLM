@@ -1,17 +1,27 @@
-import tokenizer
-import training
+import model
+import parameters
 
-tokens = tokenizer.text_to_tokens(
-    open("data/dataset.txt", "r").read()
+original = parameters.w_Q[0][0]
+
+model.save_model(
+    parameters.w_Q,
+    parameters.w_K,
+    parameters.w_V,
+    parameters.weights_1,
+    parameters.biases_1,
+    parameters.weights_2,
+    parameters.biases_2,
+    parameters.output_weights,
+    parameters.output_biases,
+    parameters.embedding_table,
+    parameters.positional_table
 )
 
-small_dataset = tokens[:2]
+parameters.w_Q[0][0] = 999999.0
 
-final_loss = training.train(
-    small_dataset,
-    context_length=16,
-    learning_rate=0.001,
-    epochs=5
-)
+print("Changed:", parameters.w_Q[0][0])
 
-print("Final loss:", final_loss)
+model.load_model()
+
+print("Loaded:", parameters.w_Q[0][0])
+print("Original:", original)
