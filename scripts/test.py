@@ -1,17 +1,17 @@
 import tokenizer
 import training
 
-tokens = tokenizer.text_to_tokens("Hello World!")
+tokens = tokenizer.text_to_tokens(
+    open("data/dataset.txt", "r").read()
+)
 
-learning_rate = 0.001
-context_length = 10
+small_dataset = tokens[:2]
 
-for step in range(20):
-    loss = training.train_step(
-        tokens,
-        0,
-        context_length,
-        learning_rate
-    )
+final_loss = training.train(
+    small_dataset,
+    context_length=16,
+    learning_rate=0.001,
+    epochs=5
+)
 
-    print(f"Step {step + 1}: Loss = {loss}")
+print("Final loss:", final_loss)

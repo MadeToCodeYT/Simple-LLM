@@ -131,3 +131,31 @@ def train_step(tokens: list[int], start: int, context_length: int, learning_rate
     )
 
     return loss
+
+def train(
+    tokens: list[int],
+    context_length: int,
+    learning_rate: float,
+    epochs: int
+) -> float:
+    final_loss = 0
+
+    for epoch in range(epochs):
+        total = 0
+        num = len(tokens) - context_length
+        for start in range(len(tokens) - context_length):
+            loss = train_step(
+                tokens,
+                start,
+                context_length,
+                learning_rate
+            )
+
+            total += loss
+            print(f"Epoch: {epoch+1}, Completion: {round(start/num*100, 1)}%, Loss: {loss}")
+
+        if num != 0:
+            print(f"Epoch: {epoch+1}, Avg. Loss: {total/num}")
+            final_loss = total / num
+
+    return final_loss
