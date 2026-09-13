@@ -22,3 +22,13 @@ weights_2 = [generate_random_vector(128) for _ in range(32)]
 biases_2 = generate_random_vector(32)
 output_weights = [generate_random_vector(32) for _ in range(59)]
 output_biases = generate_random_vector(59)
+
+embedding_table = [
+    generate_random_vector(EMBEDDING_SIZE)
+    for _ in range(59)
+]
+
+positional_table = [
+    generate_random_vector(EMBEDDING_SIZE)
+    for _ in range(MAX_CONTEXT_LENGTH)
+]

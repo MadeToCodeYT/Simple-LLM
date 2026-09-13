@@ -141,80 +141,97 @@ results = training.backpropagate(
     positional_gradients
 ) = results
 
+learning_rate = 0.001
 
-# -----------------------------
-# Print gradient shapes
-# -----------------------------
-
-print("Gradient shapes:")
-
-print(
-    "output_weight_gradients:",
-    len(output_weight_gradients),
-    "x",
-    len(output_weight_gradients[0])
+training.update_parameters(
+    output_weight_gradients,
+    output_bias_gradients,
+    weights_1_gradients,
+    biases_1_gradients,
+    weights_2_gradients,
+    biases_2_gradients,
+    W_Q_gradient,
+    W_K_gradient,
+    W_V_gradient,
+    embedding_gradients,
+    positional_gradients,
+    learning_rate
 )
 
-print(
-    "output_bias_gradients:",
-    len(output_bias_gradients)
-)
 
-print(
-    "weights_1_gradients:",
-    len(weights_1_gradients),
-    "x",
-    len(weights_1_gradients[0])
-)
+# # -----------------------------
+# # Print gradient shapes
+# # -----------------------------
 
-print(
-    "biases_1_gradients:",
-    len(biases_1_gradients)
-)
+# print("Gradient shapes:")
 
-print(
-    "weights_2_gradients:",
-    len(weights_2_gradients),
-    "x",
-    len(weights_2_gradients[0])
-)
+# print(
+#     "output_weight_gradients:",
+#     len(output_weight_gradients),
+#     "x",
+#     len(output_weight_gradients[0])
+# )
 
-print(
-    "biases_2_gradients:",
-    len(biases_2_gradients)
-)
+# print(
+#     "output_bias_gradients:",
+#     len(output_bias_gradients)
+# )
 
-print(
-    "W_Q_gradient:",
-    len(W_Q_gradient),
-    "x",
-    len(W_Q_gradient[0])
-)
+# print(
+#     "weights_1_gradients:",
+#     len(weights_1_gradients),
+#     "x",
+#     len(weights_1_gradients[0])
+# )
 
-print(
-    "W_K_gradient:",
-    len(W_K_gradient),
-    "x",
-    len(W_K_gradient[0])
-)
+# print(
+#     "biases_1_gradients:",
+#     len(biases_1_gradients)
+# )
 
-print(
-    "W_V_gradient:",
-    len(W_V_gradient),
-    "x",
-    len(W_V_gradient[0])
-)
+# print(
+#     "weights_2_gradients:",
+#     len(weights_2_gradients),
+#     "x",
+#     len(weights_2_gradients[0])
+# )
 
-print(
-    "embedding_gradients:",
-    len(embedding_gradients),
-    "x",
-    len(embedding_gradients[0])
-)
+# print(
+#     "biases_2_gradients:",
+#     len(biases_2_gradients)
+# )
 
-print(
-    "positional_gradients:",
-    len(positional_gradients),
-    "x",
-    len(positional_gradients[0])
-)
+# print(
+#     "W_Q_gradient:",
+#     len(W_Q_gradient),
+#     "x",
+#     len(W_Q_gradient[0])
+# )
+
+# print(
+#     "W_K_gradient:",
+#     len(W_K_gradient),
+#     "x",
+#     len(W_K_gradient[0])
+# )
+
+# print(
+#     "W_V_gradient:",
+#     len(W_V_gradient),
+#     "x",
+#     len(W_V_gradient[0])
+# )
+
+# print(
+#     "embedding_gradients:",
+#     len(embedding_gradients),
+#     "x",
+#     len(embedding_gradients[0])
+# )
+
+# print(
+#     "positional_gradients:",
+#     len(positional_gradients),
+#     "x",
+#     len(positional_gradients[0])
+# )

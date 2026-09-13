@@ -586,3 +586,70 @@ def backpropagate(
         embedding_gradients,
         positional_gradients
     )
+
+def update_parameters(
+    output_weight_gradients: list[list[float]],
+    output_bias_gradients: list[float],
+    weights_1_gradients: list[list[float]],
+    biases_1_gradients: list[float],
+    weights_2_gradients: list[list[float]],
+    biases_2_gradients: list[float],
+    W_Q_gradient: list[list[float]],
+    W_K_gradient: list[list[float]],
+    W_V_gradient: list[list[float]],
+    embedding_gradients: list[list[float]],
+    positional_gradients: list[list[float]],
+    learning_rate: float
+) -> None:
+
+    # Output weights
+    for i in range(len(output_weights)):
+        for j in range(len(output_weights[i])):
+            output_weights[i][j] -= learning_rate * output_weight_gradients[i][j]
+
+    # Output biases
+    for i in range(len(output_biases)):
+        output_biases[i] -= learning_rate * output_bias_gradients[i]
+
+    # First feed-forward layer weights
+    for i in range(len(weights_1)):
+        for j in range(len(weights_1[i])):
+            weights_1[i][j] -= learning_rate * weights_1_gradients[i][j]
+
+    # First feed-forward layer biases
+    for i in range(len(biases_1)):
+        biases_1[i] -= learning_rate * biases_1_gradients[i]
+
+    # Second feed-forward layer weights
+    for i in range(len(weights_2)):
+        for j in range(len(weights_2[i])):
+            weights_2[i][j] -= learning_rate * weights_2_gradients[i][j]
+
+    # Second feed-forward layer biases
+    for i in range(len(biases_2)):
+        biases_2[i] -= learning_rate * biases_2_gradients[i]
+
+    # Query weights
+    for i in range(len(w_Q)):
+        for j in range(len(w_Q[i])):
+            w_Q[i][j] -= learning_rate * W_Q_gradient[i][j]
+
+    # Key weights
+    for i in range(len(w_K)):
+        for j in range(len(w_K[i])):
+            w_K[i][j] -= learning_rate * W_K_gradient[i][j]
+
+    # Value weights
+    for i in range(len(w_V)):
+        for j in range(len(w_V[i])):
+            w_V[i][j] -= learning_rate * W_V_gradient[i][j]
+
+    # Token embeddings
+    for i in range(len(embedding_table)):
+        for j in range(len(embedding_table[i])):
+            embedding_table[i][j] -= learning_rate * embedding_gradients[i][j]
+
+    # Positional embeddings
+    for i in range(len(positional_table)):
+        for j in range(len(positional_table[i])):
+            positional_table[i][j] -= learning_rate * positional_gradients[i][j]
