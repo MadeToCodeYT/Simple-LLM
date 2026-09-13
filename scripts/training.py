@@ -4,6 +4,7 @@ import positional
 import attention
 import normalization
 import backpropagation
+import model
 
 import parameters
 
@@ -142,7 +143,7 @@ def train(
 
     for epoch in range(epochs):
         total = 0
-        num = len(tokens) - context_length
+        length = len(tokens) - context_length
         for start in range(len(tokens) - context_length):
             loss = train_step(
                 tokens,
@@ -152,10 +153,37 @@ def train(
             )
 
             total += loss
-            print(f"Epoch: {epoch+1}, Completion: {round(start/num*100, 1)}%, Loss: {loss}")
+            print(f"Epoch: {epoch+1}, Completion: {round(start/length*100, 1)}%, Loss: {loss}")
 
-        if num != 0:
-            print(f"Epoch: {epoch+1}, Avg. Loss: {total/num}")
-            final_loss = total / num
+        if length != 0:
+            print(f"Epoch: {epoch+1}, Avg. Loss: {total/length}")
+            final_loss = total / length
+
+    model.save_model(
+        parameters.w_Q,
+        parameters.w_K,
+        parameters.w_V,
+        parameters.weights_1,
+        parameters.biases_1,
+        parameters.weights_2,
+        parameters.biases_2,
+        parameters.output_weights,
+        parameters.output_biases,
+        parameters.embedding_table,
+        parameters.positional_table
+    )
 
     return final_loss
+
+tokens = tokenizer.text_to_tokens(
+    open("data/dataset.txt", "r").read()
+)
+
+final_loss = train(
+    tokens,
+    context_length=16,
+    learning_rate=0.001,
+    epochs=5
+)
+
+print("Final loss:", final_loss)
