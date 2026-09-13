@@ -1,5 +1,5 @@
 import math
-from parameters import *
+import parameters
 
 def calc_prod(vector: list[float], matrix: list[list[float]]) -> list[float]:
     if len(matrix[0]) != len(vector):
@@ -22,9 +22,9 @@ def get_qkv(embeddings: list[list[float]]) -> tuple[list[list[float]], list[list
     values = []
 
     for embedding in embeddings:
-        queries.append(calc_prod(embedding, w_Q))
-        keys.append(calc_prod(embedding, w_K))
-        values.append(calc_prod(embedding, w_V))
+        queries.append(calc_prod(embedding, parameters.w_Q))
+        keys.append(calc_prod(embedding, parameters.w_K))
+        values.append(calc_prod(embedding, parameters.w_V))
 
     return queries, keys, values
 
@@ -49,7 +49,7 @@ def calculate_scores(queries: list[list[float]], keys: list[list[float]]) -> lis
         row = []
 
         for key in keys:
-            score = attention_score(query, key) / ATTENTION_SQRT
+            score = attention_score(query, key) / parameters.ATTENTION_SQRT
             row.append(score)
 
         score_table.append(row)

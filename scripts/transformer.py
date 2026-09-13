@@ -3,7 +3,7 @@ import embeddings
 import positional
 import normalization
 import attention
-from parameters import *
+import parameters
 
 def transformer_block(position_aware_embeddings: list[list[float]]) -> list[list[float]]:
     queries, keys, values = attention.get_qkv(position_aware_embeddings)
@@ -28,10 +28,10 @@ def transformer_block(position_aware_embeddings: list[list[float]]) -> list[list
 
     feed_forward_output = normalization.apply_feed_forward_to_vectors(
         normalized_attention,
-        weights_1,
-        biases_1,
-        weights_2,
-        biases_2
+        parameters.weights_1,
+        parameters.biases_1,
+        parameters.weights_2,
+        parameters.biases_2
     )
 
     residual_feed_forward = normalization.add_feed_forward_residual(
@@ -47,8 +47,8 @@ def transformer_block(position_aware_embeddings: list[list[float]]) -> list[list
 def generate_logits(vector: list[float]) -> list[float]:
     return normalization.linear_layer(
         vector,
-        output_weights,
-        output_biases
+        parameters.output_weights,
+        parameters.output_biases
     )
 
 def generate_probabilities(logits: list[float]) -> list[float]:

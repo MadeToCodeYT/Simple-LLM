@@ -1,5 +1,5 @@
 import math
-from parameters import *
+import parameters
 
 def create_training_example(tokens: list[int], start: int, context_length: int) -> tuple[list[int], list[int]]:
     input_tokens = tokens[start:start + context_length]
@@ -218,11 +218,11 @@ def calculate_scores_gradient(
         for j in range(len(keys)):
             for k in range(len(queries[i])):
                 queries_gradients[i][k] += (
-                    gradient[i][j] * keys[j][k] / ATTENTION_SQRT
+                    gradient[i][j] * keys[j][k] / parameters.ATTENTION_SQRT
                 )
 
                 keys_gradients[j][k] += (
-                    gradient[i][j] * queries[i][k] / ATTENTION_SQRT
+                    gradient[i][j] * queries[i][k] / parameters.ATTENTION_SQRT
                 )
 
     return queries_gradients, keys_gradients
@@ -240,19 +240,19 @@ def calculate_qkv_gradient(
         _, _, query_input_gradient = calculate_linear_layer_gradients(
             queries_gradient[i],
             position_aware_embeddings[i],
-            w_Q
+            parameters.w_Q
         )
 
         _, _, key_input_gradient = calculate_linear_layer_gradients(
             keys_gradient[i],
             position_aware_embeddings[i],
-            w_K
+            parameters.w_K
         )
 
         _, _, value_input_gradient = calculate_linear_layer_gradients(
             values_gradient[i],
             position_aware_embeddings[i],
-            w_V
+            parameters.w_V
         )
 
         embedding_gradient = []
@@ -371,7 +371,7 @@ def backpropagate(
 
     output_vector_gradient = calculate_output_vector_gradient(
         logits_gradient,
-        output_weights
+        parameters.output_weights
     )
 
 
@@ -404,7 +404,7 @@ def backpropagate(
     weights_2_gradients, biases_2_gradients, relu_gradient = calculate_linear_layer_gradients(
         feed_forward_output_gradient,
         relu_output,
-        weights_2
+        parameters.weights_2
     )
 
 
@@ -425,7 +425,7 @@ def backpropagate(
     weights_1_gradients, biases_1_gradients, normalized_attention_gradient_from_ffn = calculate_linear_layer_gradients(
         linear_1_gradient,
         normalized_attention,
-        weights_1
+        parameters.weights_1
     )
 
 
@@ -603,53 +603,53 @@ def update_parameters(
 ) -> None:
 
     # Output weights
-    for i in range(len(output_weights)):
-        for j in range(len(output_weights[i])):
-            output_weights[i][j] -= learning_rate * output_weight_gradients[i][j]
+    for i in range(len(parameters.output_weights)):
+        for j in range(len(parameters.output_weights[i])):
+            parameters.output_weights[i][j] -= learning_rate * output_weight_gradients[i][j]
 
     # Output biases
-    for i in range(len(output_biases)):
-        output_biases[i] -= learning_rate * output_bias_gradients[i]
+    for i in range(len(parameters.output_biases)):
+        parameters.output_biases[i] -= learning_rate * output_bias_gradients[i]
 
     # First feed-forward layer weights
-    for i in range(len(weights_1)):
-        for j in range(len(weights_1[i])):
-            weights_1[i][j] -= learning_rate * weights_1_gradients[i][j]
+    for i in range(len(parameters.weights_1)):
+        for j in range(len(parameters.weights_1[i])):
+            parameters.weights_1[i][j] -= learning_rate * weights_1_gradients[i][j]
 
     # First feed-forward layer biases
-    for i in range(len(biases_1)):
-        biases_1[i] -= learning_rate * biases_1_gradients[i]
+    for i in range(len(parameters.biases_1)):
+        parameters.biases_1[i] -= learning_rate * biases_1_gradients[i]
 
     # Second feed-forward layer weights
-    for i in range(len(weights_2)):
-        for j in range(len(weights_2[i])):
-            weights_2[i][j] -= learning_rate * weights_2_gradients[i][j]
+    for i in range(len(parameters.weights_2)):
+        for j in range(len(parameters.weights_2[i])):
+            parameters.weights_2[i][j] -= learning_rate * weights_2_gradients[i][j]
 
     # Second feed-forward layer biases
-    for i in range(len(biases_2)):
-        biases_2[i] -= learning_rate * biases_2_gradients[i]
+    for i in range(len(parameters.biases_2)):
+        parameters.biases_2[i] -= learning_rate * biases_2_gradients[i]
 
     # Query weights
-    for i in range(len(w_Q)):
-        for j in range(len(w_Q[i])):
-            w_Q[i][j] -= learning_rate * W_Q_gradient[i][j]
+    for i in range(len(parameters.w_Q)):
+        for j in range(len(parameters.w_Q[i])):
+            parameters.w_Q[i][j] -= learning_rate * W_Q_gradient[i][j]
 
     # Key weights
-    for i in range(len(w_K)):
-        for j in range(len(w_K[i])):
-            w_K[i][j] -= learning_rate * W_K_gradient[i][j]
+    for i in range(len(parameters.w_K)):
+        for j in range(len(parameters.w_K[i])):
+            parameters.w_K[i][j] -= learning_rate * W_K_gradient[i][j]
 
     # Value weights
-    for i in range(len(w_V)):
-        for j in range(len(w_V[i])):
-            w_V[i][j] -= learning_rate * W_V_gradient[i][j]
+    for i in range(len(parameters.w_V)):
+        for j in range(len(parameters.w_V[i])):
+            parameters.w_V[i][j] -= learning_rate * W_V_gradient[i][j]
 
     # Token embeddings
-    for i in range(len(embedding_table)):
-        for j in range(len(embedding_table[i])):
-            embedding_table[i][j] -= learning_rate * embedding_gradients[i][j]
+    for i in range(len(parameters.embedding_table)):
+        for j in range(len(parameters.embedding_table[i])):
+            parameters.embedding_table[i][j] -= learning_rate * embedding_gradients[i][j]
 
     # Positional embeddings
-    for i in range(len(positional_table)):
-        for j in range(len(positional_table[i])):
-            positional_table[i][j] -= learning_rate * positional_gradients[i][j]
+    for i in range(len(parameters.positional_table)):
+        for j in range(len(parameters.positional_table[i])):
+            parameters.positional_table[i][j] -= learning_rate * positional_gradients[i][j]
