@@ -7,10 +7,20 @@ with open("data/dataset.txt", "r") as file:
 
 def count_pairs(characters: list[str]) -> dict[tuple[str, str], int]:
 	pairs = {}
-	for i in range(len(characters)-1):
+
+	for i in range(len(characters) - 1):
 		char = characters[i]
-		
-		pairs[(char, characters[i+1])] = pairs.get((char, characters[i+1]), 0) + 1
+		next_char = characters[i + 1]
+
+		# Don't merge anything with a newline
+		if char == "\n" or next_char == "\n":
+			continue
+
+		# Don't allow spaces as the second character
+		if next_char == " ":
+			continue
+
+		pairs[(char, next_char)] = pairs.get((char, next_char), 0) + 1
 
 	return pairs
 
@@ -85,6 +95,7 @@ for pair in merges:
 	if add_to_vocabulary(token, count):
 		count += 1
 
+
 def text_to_tokens(text: str) -> list[int]:
 	tokens = list(text)
 
@@ -107,8 +118,4 @@ def tokens_to_text(tokens: list[int]) -> str:
 	return text
 
 if __name__ == "__main__":
-	print(f"Length of vocabulary: {count}")
-
-	text = "The cat sat on the mat"
-
-	print(tokens_to_text(text_to_tokens(text)))
+	print(f"Vocabulary count: {count}")
