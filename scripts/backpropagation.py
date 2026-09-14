@@ -314,7 +314,7 @@ def calculate_embedding_gradients(
 ) -> tuple[list[list[float]], list[list[float]]]:
     embedding_gradients = [
         [0.0 for _ in range(32)]
-        for _ in range(59)
+        for _ in range(parameters.VOCABULARY_LENGTH)
     ]
     # Both are currently hardcoded - Reminder: replace these with variables/use table lengths
     positional_gradients = [
