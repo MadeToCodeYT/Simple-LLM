@@ -3,11 +3,16 @@ import transformer
 
 model.load_model()
 
-prompt = "Hello"
+while True:
+    prompt = input("User: ")
 
-result = transformer.generate(
-    prompt,
-    num_tokens=50
-)
+    if prompt.lower() == "exit":
+        break
 
-print(result)
+    result = transformer.generate(
+        prompt,
+        num_tokens=50
+    )
+
+    print("Large Language Model:")
+    print(result + "\n")

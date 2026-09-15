@@ -86,6 +86,9 @@ def generate_text(tokens: list[int], num_tokens: int) -> list[int]:
 
     for _ in range(num_tokens):
         next_token = generate_next_token(generated_tokens)
+        if tokenizer.reverse_vocabulary[next_token] == "<END>":
+            break
+
         generated_tokens.append(next_token)
 
     return generated_tokens
