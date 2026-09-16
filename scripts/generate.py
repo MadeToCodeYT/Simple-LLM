@@ -10,9 +10,9 @@ while True:
         break
 
     result = transformer.generate(
-        prompt,
+        f"User: {prompt}\nLarge Language Model:""",
         num_tokens=50
     )
 
-    print("Large Language Model:")
+    print("Large Language Model: ", end="")
     print(result + "\n")

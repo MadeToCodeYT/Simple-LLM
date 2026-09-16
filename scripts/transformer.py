@@ -98,4 +98,6 @@ def generate(prompt: str, num_tokens: int) -> str:
 
     generated_tokens = generate_text(tokens, num_tokens)
 
-    return tokenizer.tokens_to_text(generated_tokens)
+    new_tokens = generated_tokens[len(tokens):]
+
+    return tokenizer.tokens_to_text(new_tokens)

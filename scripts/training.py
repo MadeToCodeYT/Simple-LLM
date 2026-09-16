@@ -183,7 +183,7 @@ final_loss = train(
     tokens,
     context_length=16,
     learning_rate=0.001,
-    epochs=5
+    epochs=50
 )
 
 print("Final loss:", final_loss)
