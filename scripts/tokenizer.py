@@ -125,7 +125,7 @@ reverse_vocabulary = {}
 count = 0
 
 # Add all individual characters and the special token
-required = list(set(data))
+required = sorted(list(set(data)))
 for token in required:
 	if add_to_vocabulary(token, count):
 		count += 1

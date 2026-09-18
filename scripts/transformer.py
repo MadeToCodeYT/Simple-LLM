@@ -4,6 +4,7 @@ import positional
 import normalization
 import attention
 import parameters
+import random
 
 def transformer_block(position_aware_embeddings: list[list[float]]) -> list[list[float]]:
     queries, keys, values = attention.get_qkv(position_aware_embeddings)
@@ -55,18 +56,17 @@ def generate_probabilities(logits: list[float]) -> list[float]:
     return attention.apply_softmax(logits)
 
 def select_token(probabilities: list[float]) -> int:
-    # Should introduct sampling at some point but for now chooses the highest token's probability
-    # [ 0.3, 0.2, 0.5 ]
-    #              ^
+    # Introduces sampling based on probabilities
+    # Uses random.choices with weights as probabilities
 
-    index = 0
-    for i in range(len(probabilities)):
-        if probabilities[index] < probabilities[i]:
-            index = i
+    indices = list(range(len(probabilities)))
+    selected_index = random.choices(indices, weights=probabilities, k=1)[0]
 
-    return index
+    return selected_index
 
 def generate_next_token(tokens: list[int]) -> int:
+    tokens = tokens[-parameters.CONTEXT_LENGTH:]
+    
     embeds = embeddings.tokens_to_embeddings(tokens)
 
     positional_info = positional.get_position_aware_embeddings(embeds)

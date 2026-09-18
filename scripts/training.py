@@ -5,6 +5,7 @@ import attention
 import normalization
 import backpropagation
 import model
+import random
 
 import parameters
 
@@ -140,11 +141,14 @@ def train(
     epochs: int
 ) -> float:
     final_loss = 0
+    length = len(tokens) - context_length
+    starts = list(range(length))
 
     for epoch in range(epochs):
         total = 0
-        length = len(tokens) - context_length
-        for start in range(len(tokens) - context_length):
+        random.shuffle(starts)
+
+        for i, start in enumerate(starts):
             loss = train_step(
                 tokens,
                 start,
@@ -153,7 +157,7 @@ def train(
             )
 
             total += loss
-            print(f"Epoch: {epoch+1}, Completion: {round(start/length*100, 1)}%, Loss: {loss}")
+            # print(f"Epoch: {epoch+1}, Completion: {round(i/length*100, 1)}%, Loss: {loss}")
 
         if length != 0:
             print(f"Epoch: {epoch+1}, Avg. Loss: {total/length}")
@@ -181,7 +185,7 @@ tokens = tokenizer.text_to_tokens(
 
 final_loss = train(
     tokens,
-    context_length=16,
+    context_length=parameters.CONTEXT_LENGTH,
     learning_rate=0.001,
     epochs=50
 )
