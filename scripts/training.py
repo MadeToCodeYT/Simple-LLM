@@ -5,9 +5,11 @@ import attention
 import normalization
 import backpropagation
 import model
-import random
-
 import parameters
+
+import copy
+import random
+import os
 
 def train_step(tokens: list[int], start: int, context_length: int, learning_rate: float) -> float:
     input_tokens, target_tokens = backpropagation.create_training_example(
@@ -134,36 +136,8 @@ def train_step(tokens: list[int], start: int, context_length: int, learning_rate
 
     return loss
 
-def train(
-    tokens: list[int],
-    context_length: int,
-    learning_rate: float,
-    epochs: int
-) -> float:
-    final_loss = 0
-    length = len(tokens) - context_length
-    starts = list(range(length))
-
-    for epoch in range(epochs):
-        total = 0
-        random.shuffle(starts)
-
-        for i, start in enumerate(starts):
-            loss = train_step(
-                tokens,
-                start,
-                context_length,
-                learning_rate
-            )
-
-            total += loss
-            # print(f"Epoch: {epoch+1}, Completion: {round(i/length*100, 1)}%, Loss: {loss}")
-
-        if length != 0:
-            print(f"Epoch: {epoch+1}, Avg. Loss: {total/length}")
-            final_loss = total / length
-
-    model.save_model(
+def snapshot_parameters() -> list:
+    return copy.deepcopy([
         parameters.w_Q,
         parameters.w_K,
         parameters.w_V,
@@ -175,19 +149,67 @@ def train(
         parameters.output_biases,
         parameters.embedding_table,
         parameters.positional_table
-    )
+    ])
 
-    return final_loss
+def train(
+    tokens: list[int],
+    context_length: int,
+    learning_rate: float,
+    epochs: int,
+    starting_epoch: int
+) -> None:
+    length = len(tokens) - context_length
+    starts = list(range(length))
+
+    last_completed_epoch = starting_epoch
+    last_saved_parameters = snapshot_parameters()
+
+    try:
+        for epoch in range(starting_epoch+1, epochs+1):
+            total = 0
+            random.shuffle(starts)
+
+            for i, start in enumerate(starts):
+                loss = train_step(
+                    tokens,
+                    start,
+                    context_length,
+                    learning_rate
+                )
+
+                total += loss
+                print(f"Epoch: {epoch}, Completion: {round(i/length*100, 1)}%, Loss: {loss}")
+
+            if length != 0:
+                print(f"Epoch: {epoch}, Avg. Loss: {total/length}")
+
+            # This epoch is now fully done -> take a clean snapshot
+            last_completed_epoch = epoch
+            last_saved_parameters = snapshot_parameters()
+
+        model.save_model(*last_saved_parameters)
+    except KeyboardInterrupt:
+        # Only ever save the last epoch that fully finished, never
+        # whatever's mid-flight when the interrupt lands
+        model.save_checkpoint(
+            last_completed_epoch,
+            *last_saved_parameters
+        )
+
 
 tokens = tokenizer.text_to_tokens(
     open("data/dataset.txt", "r").read()
 )
 
-final_loss = train(
+starting_epoch = 0
+
+if os.path.exists("model/checkpoint.json"):
+    starting_epoch = model.load_checkpoint()
+
+train(
     tokens,
     context_length=parameters.CONTEXT_LENGTH,
     learning_rate=0.001,
-    epochs=50
+    epochs=300,
+    starting_epoch=starting_epoch
 )
-
-print("Final loss:", final_loss)
