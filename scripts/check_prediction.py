@@ -1,37 +1,13 @@
 import tokenizer
-import model
-import embeddings
-import positional
-import transformer
-import parameters
 
-model.load_model()
+with open("data/dataset.txt") as f:
+    content = f.read()
 
-# A prefix taken verbatim from a training example, right before the word
-# we expect it to predict next ("attracts").
-prefix = "User: What is gravity?\nLarge Language Model: Gravity is the force that "
+pairs = [p.strip() for p in content.split("<END>") if p.strip()]
+lengths = [len(tokenizer.text_to_tokens(p)) for p in pairs]
+lengths.sort()
 
-tokens = tokenizer.text_to_tokens(prefix)
-
-# Use the same trailing-window logic generation uses
-windowed = tokens[-parameters.CONTEXT_LENGTH:]
-
-embeds = embeddings.tokens_to_embeddings(windowed)
-positional_info = positional.get_position_aware_embeddings(embeds)
-output_vectors = transformer.transformer_block(positional_info)
-
-logits = transformer.generate_logits(output_vectors[-1])
-probabilities = transformer.generate_probabilities(logits)
-
-# Show the model's top 5 guesses for the very next token, with probabilities
-ranked = sorted(
-    range(len(probabilities)),
-    key=lambda i: probabilities[i],
-    reverse=True
-)
-
-print(f"Prefix: {prefix!r}\n")
-print("Top 5 predicted next tokens:")
-for idx in ranked[:5]:
-    token_text = tokenizer.reverse_vocabulary[idx]
-    print(f"  {token_text!r}  ({probabilities[idx]*100:.2f}%)")
+print("max:", lengths[-1])
+print("median:", lengths[len(lengths)//2])
+print("count over 96:", sum(1 for l in lengths if l > 96))
+print("count over 96:", sum(1 for l in lengths if l > 160))

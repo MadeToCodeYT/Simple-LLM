@@ -28,8 +28,7 @@ data = split_special_tokens(raw_data)
 
 # These tokens are boundaries.
 # BPE is not allowed to merge anything with them.
-restricted = ["\n", " ", SPECIAL_TOKEN]
-
+restricted = ["\n", " ", SPECIAL_TOKEN, "."]
 
 def count_pairs(characters: list[str]) -> dict[tuple[str, str], int]:
 	pairs = {}
@@ -38,7 +37,7 @@ def count_pairs(characters: list[str]) -> dict[tuple[str, str], int]:
 		char = characters[i]
 		next_char = characters[i + 1]
 
-		# Don't merge across restricted tokens
+		# Don't merge with restricted tokens
 		if char in restricted or next_char in restricted:
 			continue
 
@@ -87,7 +86,8 @@ def merge_pair(
 
 def learn_bpe(
 	tokens: list[str],
-	num_merges: int
+	num_merges: int,
+	min_count: int = 3
 ) -> list[tuple[str, str]]:
 
 	result = tokens.copy()
@@ -98,8 +98,7 @@ def learn_bpe(
 
 		most_common, count = get_most_common_pair(pairs)
 
-		# No useful pairs remain
-		if count <= 1:
+		if count < min_count:
 			break
 
 		result = merge_pair(result, most_common)
@@ -107,9 +106,30 @@ def learn_bpe(
 
 	return merges
 
+def remove_contained_merges(merges: list[tuple[str, str]]) -> list[tuple[str, str]]:
+	"""
+	If one merge's resulting token is fully contained inside another
+	merge's resulting token, drop the shorter one and keep the longer.
+	"""
+	tokens = [pair[0] + pair[1] for pair in merges]
+
+	kept = []
+	for i, token in enumerate(tokens):
+		contained_in_another = False
+
+		for j, other in enumerate(tokens):
+			if i != j and token != other and token in other:
+				contained_in_another = True
+				break
+
+		if not contained_in_another:
+			kept.append(merges[i])
+
+	return kept
+
+
 
 def add_to_vocabulary(vocab: str, count: int) -> bool:
-
 	if vocab in vocabulary:
 		return False
 
@@ -119,6 +139,7 @@ def add_to_vocabulary(vocab: str, count: int) -> bool:
 	return True
 
 merges = learn_bpe(data, 500)
+merges = remove_contained_merges(merges)
 
 vocabulary = {}
 reverse_vocabulary = {}

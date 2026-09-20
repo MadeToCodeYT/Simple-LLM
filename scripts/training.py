@@ -9,6 +9,7 @@ import parameters
 
 import copy
 import random
+import time
 import os
 
 def train_step(tokens: list[int], start: int, context_length: int, learning_rate: float) -> float:
@@ -164,10 +165,32 @@ def train(
     last_completed_epoch = starting_epoch
     last_saved_parameters = snapshot_parameters()
 
+    previous_epochs = [
+        # [Number, Avg. Loss]
+    ]
+    last_epoch_duration = None
+
     try:
         for epoch in range(starting_epoch+1, epochs+1):
+            os.system("cls" if os.name == "nt" else "clear")
+
+            # Print out estimated time left
+            if last_epoch_duration is not None:
+                remaining_epochs = epochs - epoch + 1
+                estimated_time = last_epoch_duration * remaining_epochs
+
+                hours, remainder = divmod(estimated_time, 3600)
+                minutes, seconds = divmod(remainder, 60)
+                print(f"Estimated Time Left: {int(hours)}h. {int(minutes)}m. {int(seconds)}s.\n")
+
+            # Print out each epoch's avg loss
+            for num, avg_loss in previous_epochs[-20:]:
+                print(f"Epoch: {num}, Avg. Loss: {avg_loss}")
+
             total = 0
             random.shuffle(starts)
+
+            epoch_start_time = time.time()
 
             for i, start in enumerate(starts):
                 loss = train_step(
@@ -178,14 +201,17 @@ def train(
                 )
 
                 total += loss
-                print(f"Epoch: {epoch}, Completion: {round(i/length*100, 1)}%, Loss: {loss}")
+                print(f"Epoch: {epoch}, Completion: {round(i/length*100, 4)}%, Loss: {loss}")
+
 
             if length != 0:
-                print(f"Epoch: {epoch}, Avg. Loss: {total/length}")
+                previous_epochs.append([epoch, total/length])
 
             # This epoch is now fully done -> take a clean snapshot
             last_completed_epoch = epoch
             last_saved_parameters = snapshot_parameters()
+
+            last_epoch_duration = time.time() - epoch_start_time
 
         model.save_model(*last_saved_parameters)
     except KeyboardInterrupt:
@@ -210,6 +236,6 @@ train(
     tokens,
     context_length=parameters.CONTEXT_LENGTH,
     learning_rate=0.001,
-    epochs=300,
+    epochs=100,
     starting_epoch=starting_epoch
 )

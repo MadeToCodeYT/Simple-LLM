@@ -313,13 +313,12 @@ def calculate_embedding_gradients(
     tokens: list[int]
 ) -> tuple[list[list[float]], list[list[float]]]:
     embedding_gradients = [
-        [0.0 for _ in range(32)]
+        [0.0 for _ in range(parameters.EMBEDDING_SIZE)]
         for _ in range(parameters.VOCABULARY_LENGTH)
     ]
-    # Both are currently hardcoded - Reminder: replace these with variables/use table lengths
     positional_gradients = [
-        [0.0 for _ in range(32)]
-        for _ in range(128)
+        [0.0 for _ in range(parameters.EMBEDDING_SIZE)]
+        for _ in range(parameters.MAX_CONTEXT_LENGTH)
     ]
 
     for i in range(len(position_aware_embeddings_gradient)):
